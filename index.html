@@ -60,7 +60,6 @@
       overflow-x: hidden;
     }
 
-    /* Confetti Canvas */
     #confetti-canvas {
       position: fixed;
       top: 0;
@@ -81,7 +80,7 @@
     .hero {
       text-align: center;
       padding: 36px 24px 32px;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(12px);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
@@ -158,14 +157,61 @@
       margin-bottom: 24px;
     }
 
+    .section-header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
     .section-title {
       font-size: 1.25rem;
       font-weight: 800;
       color: #0F172A;
-      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #F0FDF4;
+      color: #15803D;
+      border: 1px solid #BBF7D0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .sync-badge.syncing {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border-color: #BFDBFE;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22C55E;
+      display: inline-block;
+    }
+
+    .sync-badge.syncing .sync-dot {
+      background: #3B82F6;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
     }
 
     .section-desc {
@@ -378,8 +424,9 @@
       box-shadow: 0 12px 24px rgba(99, 102, 241, 0.36);
     }
 
-    .submit-btn:active {
-      transform: translateY(0);
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
     }
 
     .error-msg {
@@ -614,7 +661,7 @@
     }
 
     .ghost-btn {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid #CBD5E1;
       color: #475569;
       padding: 8px 14px;
@@ -669,18 +716,6 @@
       color: var(--text-muted);
       margin-bottom: 16px;
     }
-
-    .code-snippet {
-      background: #0F172A;
-      color: #E2E8F0;
-      padding: 12px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 0.78rem;
-      overflow-x: auto;
-      margin: 8px 0 14px;
-      white-space: pre;
-    }
   </style>
 </head>
 <body>
@@ -702,7 +737,7 @@
 
     <!-- VOTING CARD -->
     <section class="card" aria-labelledby="vote-heading">
-      <h2 class="section-title" id="vote-heading">🗳️ 1. Elegí tu predicción</h2>
+      <h2 class="section-title" id="vote-heading" style="margin-bottom: 6px;">🗳️ 1. Elegí tu predicción</h2>
       <p class="section-desc">Tocá una de las 3 opciones para votar qué creés que va a ser:</p>
 
       <div class="vote-options" role="radiogroup" aria-label="Opciones de votación">
@@ -731,8 +766,8 @@
         </div>
       </div>
 
-      <h2 class="section-title">💌 2. Contanos quién vota</h2>
-      <p class="section-desc">Así queda registrado tu voto en el marcador familiar:</p>
+      <h2 class="section-title" style="margin-bottom: 6px;">💌 2. Contanos quién vota</h2>
+      <p class="section-desc">Tu voto se guarda en la nube y se ve al instante en todos los celulares y computadoras:</p>
 
       <div id="error-box" class="error-msg"></div>
 
@@ -767,18 +802,24 @@
 
       <!-- SUCCESS & WHATSAPP SHARE -->
       <div id="vote-success" class="vote-success">
-        <h4 id="success-title">🎉 ¡Tu voto quedó registrado!</h4>
-        <p id="success-desc">Mandá tu voto por WhatsApp al grupo de la familia o a los papás para que todos se enteren:</p>
+        <h4 id="success-title">🎉 ¡Tu voto ya quedó sincronizado en vivo!</h4>
+        <p id="success-desc">Ya aparece en el marcador de toda la familia. Si querés, compartilo también por WhatsApp:</p>
         <a id="whatsapp-share-link" href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
-          📲 Enviar mi voto por WhatsApp
+          📲 Compartir mi voto por WhatsApp
         </a>
       </div>
     </section>
 
     <!-- LIVE SCOREBOARD -->
     <section class="card" aria-labelledby="results-heading">
-      <h2 class="section-title" id="results-heading">📊 Marcador Familiar</h2>
-      <p class="section-desc">Así viene la votación entre Varón, Nena y Ni idea:</p>
+      <div class="section-header-row">
+        <h2 class="section-title" id="results-heading">📊 Marcador Familiar en Vivo</h2>
+        <div class="sync-badge" id="sync-status" onclick="syncFromCloud(true)" title="Tocar para actualizar ahora">
+          <span class="sync-dot"></span>
+          <span id="sync-text">Sincronizado en vivo 🔄</span>
+        </div>
+      </div>
+      <p class="section-desc">Los votos de todos los dispositivos se actualizan acá automáticamente:</p>
 
       <div class="scoreboard-summary">
         <div class="score-pill boy">
@@ -803,7 +844,7 @@
         <div class="bar-segment bar-girl" id="bar-nena" style="width: 33.3%;"></div>
         <div class="bar-segment bar-idk" id="bar-idk" style="width: 33.4%;"></div>
       </div>
-      <div class="total-votes-caption" id="total-votes-text">Todavía no hay votos — ¡sé la primera persona en votar!</div>
+      <div class="total-votes-caption" id="total-votes-text">Conectando con el marcador familiar...</div>
 
       <!-- FAMILY WALL -->
       <h3 class="section-title" style="margin-top: 26px; font-size: 1.1rem;">💬 Muro de Votos y Deseos</h3>
@@ -812,9 +853,9 @@
 
     <!-- FOOTER TOOLS FOR HOST -->
     <div class="footer-actions">
-      <button type="button" class="ghost-btn" onclick="loadDemoVotes()">👀 Ver ejemplo con votos de prueba</button>
-      <button type="button" class="ghost-btn" onclick="openConfigModal()">⚙️ Personalizar nombres / Conectar planilla</button>
-      <button type="button" class="ghost-btn" onclick="clearLocalVotes()">🗑️ Reiniciar marcador local</button>
+      <button type="button" class="ghost-btn" onclick="syncFromCloud(true)">🔄 Actualizar votos ahora</button>
+      <button type="button" class="ghost-btn" onclick="openConfigModal()">⚙️ Personalizar nombres / Fecha</button>
+      <button type="button" class="ghost-btn" onclick="clearAllVotes()">🗑️ Borrar todos los votos (Reiniciar)</button>
     </div>
   </div>
 
@@ -822,7 +863,7 @@
   <div class="modal-backdrop" id="config-modal">
     <div class="modal-box">
       <h3>⚙️ Personalizar Página para tu Familia</h3>
-      <p>Podés personalizar los nombres, la fecha y el WhatsApp sin tocar código. Al guardar se genera un link listo para mandar a tu familia:</p>
+      <p>Podés personalizar los nombres de los papás o la fecha estimada. Al guardar, se actualiza automáticamente en todos los dispositivos:</p>
 
       <div class="field-group" style="margin-bottom: 12px;">
         <label for="cfg-parents">Nombres de los papás o familia</label>
@@ -834,59 +875,82 @@
         <input type="text" id="cfg-date" placeholder="Ej: Llegada: Abril 2027" />
       </div>
 
-      <div class="field-group" style="margin-bottom: 12px;">
-        <label for="cfg-whatsapp">Número de WhatsApp para recibir votos (opcional, con código de país)</label>
-        <input type="text" id="cfg-whatsapp" placeholder="Ej: 5491122334455 (dejar vacío para elegir contacto al enviar)" />
-      </div>
-
       <div class="field-group" style="margin-bottom: 14px;">
-        <label for="cfg-api">URL de Google Apps Script (opcional, para guardar todos los votos en un Google Sheet compartido)</label>
-        <input type="url" id="cfg-api" placeholder="https://script.google.com/macros/s/.../exec" />
+        <label for="cfg-whatsapp">Número de WhatsApp (opcional, con código de país)</label>
+        <input type="text" id="cfg-whatsapp" placeholder="Ej: 5491122334455" />
       </div>
 
-      <details style="margin-bottom: 16px; font-size: 0.84rem; color: #475569;">
-        <summary style="cursor: pointer; font-weight: 700; color: #0284C7;">¿Cómo conectar una hoja de Google Sheets gratis en 2 minutos?</summary>
-        <div style="margin-top: 8px;">
-          1. Creá una hoja en <b>Google Sheets</b> y andá a <b>Extensiones → Apps Script</b>.<br/>
-          2. Pegá este código corto y tocá <b>Implementar → Nueva implementación → Aplicación web</b> (Acceso: <i>Cualquier persona</i>):
-          <div class="code-snippet">function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var rows = sheet.getDataRange().getValues();
-  return ContentService.createTextOutput(JSON.stringify(rows.slice(1)))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var d = JSON.parse(e.postData.contents);
-  sheet.appendRow([new Date(), d.name, d.rel, d.choice, d.msg]);
-  return ContentService.createTextOutput(JSON.stringify({ok:true}))
-    .setMimeType(ContentService.MimeType.JSON);
-}</div>
-          3. Copiá la URL que te da Google y pegala arriba. ¡Todos los votos de cualquier celular se verán en vivo!
-        </div>
-      </details>
-
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px;">
         <button type="button" class="ghost-btn" onclick="closeConfigModal()">Cerrar</button>
-        <button type="button" class="submit-btn" style="margin-top: 0; width: auto; padding: 10px 20px;" onclick="saveConfig()">Guardar y actualizar link</button>
+        <button type="button" class="submit-btn" style="margin-top: 0; width: auto; padding: 10px 20px;" onclick="saveConfig()">Guardar en todos los dispositivos</button>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'baby_poll_votes_v1';
-    const CONFIG_KEY = 'baby_poll_config_v1';
-    let selectedChoice = null;
+    // =========================================================================
+    // SINCRONIZACIÓN AUTOMÁTICA EN LA NUBE (Sin cuentas ni configuración)
+    // 1) ntfy.sh Pub/Sub + Cache en tiempo real (SSE + JSON Poll)
+    // 2) keyvalue.immanuel.co respaldo persistente clave-valor (3 particiones)
+    // 3) Auto-curación entre dispositivos y migración automática de votos v1
+    // =========================================================================
 
-    // Load config from URL params or localStorage
+    const STORAGE_KEY = 'baby_poll_votes_v1';
+    const CLEAR_TS_KEY = 'bebe1_chki541_clear_ts_v2';
+    const CONFIG_KEY = 'baby_poll_config_v1';
+
+    const params = new URLSearchParams(window.location.search);
+    const ROOM_ID = (params.get('sala') || 'chki541_bebe1_votos_2026').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const NTFY_TOPIC = 'bebe_poll_' + ROOM_ID;
+    const KV_APP_KEY = '3cg7aby9';
+    const KV_BASE_KEY = ('bebe_' + ROOM_ID).slice(0, 42);
+
+    let selectedChoice = null;
+    let eventSource = null;
+    let syncPromise = null;
+
+    function setSyncIndicator(syncing, text) {
+      const badge = document.getElementById('sync-status');
+      const label = document.getElementById('sync-text');
+      if (!badge || !label) return;
+      badge.classList.toggle('syncing', !!syncing);
+      label.textContent = text || (syncing ? 'Sincronizando...' : 'Sincronizado en vivo 🔄');
+    }
+
+    function getClearTs() {
+      return Number(localStorage.getItem(CLEAR_TS_KEY) || '0');
+    }
+
+    function setClearTs(ts) {
+      if (ts > getClearTs()) {
+        localStorage.setItem(CLEAR_TS_KEY, String(ts));
+      }
+    }
+
+    function getLocalVotes() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const clearTs = getClearTs();
+        return Array.isArray(raw) ? raw.filter(v => (v.id || 0) > clearTs) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalVotes(votes) {
+      const clearTs = getClearTs();
+      const filtered = votes.filter(v => (v.id || 0) > clearTs);
+      filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+      return filtered;
+    }
+
     function getConfig() {
-      const params = new URLSearchParams(window.location.search);
       const saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}');
       return {
         parents: params.get('papas') || saved.parents || '👶 Bebé en camino',
         date: params.get('fecha') || saved.date || '📅 ¡Cada día falta menos!',
-        whatsapp: params.get('wa') || saved.whatsapp || '',
-        api: params.get('api') || saved.api || ''
+        whatsapp: params.get('wa') || saved.whatsapp || ''
       };
     }
 
@@ -894,8 +958,236 @@ function doPost(e) {
       const cfg = getConfig();
       document.getElementById('meta-parents').textContent = cfg.parents;
       document.getElementById('meta-date').textContent = cfg.date;
-      if (cfg.api) {
-        fetchCloudVotes(cfg.api);
+    }
+
+    function packVote(v) {
+      return [
+        Number(v.id) || Date.now(),
+        String(v.name || '').slice(0, 40),
+        String(v.rel || 'Familia').slice(0, 30),
+        String(v.choice || 'ni_idea'),
+        String(v.msg || '').slice(0, 140),
+        String(v.createdAt || '')
+      ];
+    }
+
+    function unpackVote(arr) {
+      if (!Array.isArray(arr)) return arr;
+      return {
+        id: Number(arr[0]) || Date.now(),
+        name: arr[1] || 'Familiar',
+        rel: arr[2] || 'Familia',
+        choice: arr[3] || 'ni_idea',
+        msg: arr[4] || '',
+        createdAt: arr[5] || ''
+      };
+    }
+
+    function toHex(str) {
+      const bytes = new TextEncoder().encode(str);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function fromHex(hex) {
+      if (!hex || typeof hex !== 'string' || hex.length % 2 !== 0) return null;
+      const bytes = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < hex.length; i += 2) {
+        bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+      }
+      return new TextDecoder().decode(bytes);
+    }
+
+    function mergeVoteLists(listA, listB, clearTs) {
+      const map = new Map();
+      [...listA, ...listB].forEach(item => {
+        if (!item) return;
+        const v = Array.isArray(item) ? unpackVote(item) : item;
+        if (!v || !v.id || Number(v.id) <= clearTs) return;
+        map.set(Number(v.id), v);
+      });
+      const merged = Array.from(map.values());
+      merged.sort((a, b) => Number(b.id) - Number(a.id));
+      return merged;
+    }
+
+    async function publishCloudState(votes, clearTs, extraConfig) {
+      const compactVotes = votes.slice(0, 38).map(packVote);
+      const payload = {
+        t: 'state',
+        c: clearTs || getClearTs(),
+        v: compactVotes
+      };
+      if (extraConfig) {
+        payload.cfg = extraConfig;
+      }
+
+      // 1. Enviar a ntfy.sh (POST text/plain evita preflight CORS y transmite por SSE al instante)
+      const ntfyPromise = fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn('Aviso ntfy:', err));
+
+      // 2. Respaldo en keyvalue.immanuel.co (dividido en hasta 3 bloques de ~8 votos cada uno)
+      const kvPromises = [];
+      for (let shard = 0; shard < 3; shard++) {
+        const slice = votes.slice(shard * 7, (shard + 1) * 7);
+        if (shard > 0 && slice.length === 0) break;
+        try {
+          const miniObj = {
+            c: payload.c,
+            v: slice.map(v => [v.id, (v.name || '').slice(0, 22), (v.rel || '').slice(0, 16), v.choice, (v.msg || '').slice(0, 45), v.createdAt || ''])
+          };
+          if (shard === 0 && extraConfig) miniObj.cfg = extraConfig;
+          const hexVal = toHex(JSON.stringify(miniObj));
+          if (hexVal.length <= 1000) {
+            kvPromises.push(
+              fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_APP_KEY}/${KV_BASE_KEY}_s${shard}/${hexVal}`, {
+                method: 'POST'
+              }).catch(() => {})
+            );
+          }
+        } catch (e) {}
+      }
+
+      await Promise.all([ntfyPromise, ...kvPromises]);
+    }
+
+    function processCloudPayload(payload, stateAcc) {
+      if (!payload || typeof payload !== 'object') return;
+      if (payload.c && Number(payload.c) > stateAcc.clearTs) {
+        stateAcc.clearTs = Number(payload.c);
+      }
+      if (payload.cfg && typeof payload.cfg === 'object') {
+        stateAcc.cfg = payload.cfg;
+      }
+      if (Array.isArray(payload.v)) {
+        payload.v.forEach(rawV => {
+          const v = unpackVote(rawV);
+          if (v && v.id) {
+            stateAcc.votes.push(v);
+          }
+        });
+      } else if (payload.vote && payload.vote.id) {
+        stateAcc.votes.push(payload.vote);
+      }
+    }
+
+    async function syncFromCloud(showIndicator = false) {
+      if (syncPromise) return syncPromise;
+      if (showIndicator) setSyncIndicator(true, 'Actualizando votos...');
+
+      syncPromise = (async () => {
+        const stateAcc = {
+          clearTs: getClearTs(),
+          votes: [],
+          cfg: null
+        };
+
+        let ntfyHadMessages = false;
+
+        // 1. Consultar historial en caché de ntfy.sh
+        try {
+          const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1&since=all`, {
+            cache: 'no-store'
+          });
+          if (res.ok) {
+            const text = await res.text();
+            const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+            lines.forEach(line => {
+              try {
+                const evt = JSON.parse(line);
+                if (evt && evt.event === 'message' && evt.message) {
+                  const data = JSON.parse(evt.message);
+                  processCloudPayload(data, stateAcc);
+                  ntfyHadMessages = true;
+                }
+              } catch (e) {}
+            });
+          }
+        } catch (err) {
+          console.warn('Error leyendo ntfy:', err);
+        }
+
+        // 2. Consultar las 3 particiones de respaldo en keyvalue.immanuel.co en paralelo
+        try {
+          const shardFetches = [0, 1, 2].map(shard =>
+            fetch(`https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_APP_KEY}/${KV_BASE_KEY}_s${shard}`, {
+              cache: 'no-store'
+            }).then(r => (r.ok ? r.text() : '')).catch(() => '')
+          );
+          const shardResults = await Promise.all(shardFetches);
+          shardResults.forEach(rawText => {
+            const cleanHex = (rawText || '').replace(/^"|"$/g, '').trim();
+            const decoded = fromHex(cleanHex);
+            if (decoded) {
+              try {
+                processCloudPayload(JSON.parse(decoded), stateAcc);
+              } catch (e) {}
+            }
+          });
+        } catch (err) {}
+
+        if (stateAcc.clearTs > getClearTs()) {
+          setClearTs(stateAcc.clearTs);
+        }
+
+        if (stateAcc.cfg) {
+          localStorage.setItem(CONFIG_KEY, JSON.stringify(stateAcc.cfg));
+          applyConfig();
+        }
+
+        const localVotes = getLocalVotes();
+        const cloudUniqueVotes = mergeVoteLists(stateAcc.votes, [], stateAcc.clearTs);
+        const merged = mergeVoteLists(localVotes, cloudUniqueVotes, stateAcc.clearTs);
+
+        saveLocalVotes(merged);
+        renderScoreboard();
+
+        // Auto-curación: si este dispositivo tenía votos locales que no estaban en la nube, los sube
+        const cloudIds = new Set(cloudUniqueVotes.map(v => Number(v.id)));
+        const hasUnsyncedLocal = localVotes.some(v => !cloudIds.has(Number(v.id)));
+        if (merged.length > 0 && (!ntfyHadMessages || hasUnsyncedLocal)) {
+          await publishCloudState(merged, stateAcc.clearTs);
+        }
+      })().finally(() => {
+        syncPromise = null;
+        setSyncIndicator(false, 'Sincronizado en vivo 🔄');
+      });
+
+      return syncPromise;
+    }
+
+    function startRealtimeStream() {
+      if (eventSource) {
+        try { eventSource.close(); } catch (e) {}
+      }
+      try {
+        eventSource = new EventSource(`https://ntfy.sh/${NTFY_TOPIC}/sse`);
+        eventSource.onmessage = (e) => {
+          try {
+            const evt = JSON.parse(e.data);
+            if (evt && evt.event === 'message' && evt.message) {
+              const payload = JSON.parse(evt.message);
+              const stateAcc = { clearTs: getClearTs(), votes: [], cfg: null };
+              processCloudPayload(payload, stateAcc);
+
+              if (stateAcc.clearTs > getClearTs()) {
+                setClearTs(stateAcc.clearTs);
+              }
+              if (stateAcc.cfg) {
+                localStorage.setItem(CONFIG_KEY, JSON.stringify(stateAcc.cfg));
+                applyConfig();
+              }
+
+              const current = getLocalVotes();
+              const merged = mergeVoteLists(current, stateAcc.votes, stateAcc.clearTs);
+              saveLocalVotes(merged);
+              renderScoreboard();
+            }
+          } catch (err) {}
+        };
+      } catch (err) {
+        console.warn('SSE no disponible, usando polling.');
       }
     }
 
@@ -907,18 +1199,6 @@ function doPost(e) {
         card.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       });
       document.getElementById('error-box').style.display = 'none';
-    }
-
-    function getVotes() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveVotes(votes) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
     }
 
     function formatChoiceLabel(choice) {
@@ -952,6 +1232,11 @@ function doPost(e) {
         return;
       }
 
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Sincronizando tu voto con toda la familia...';
+      setSyncIndicator(true, 'Guardando voto...');
+
       const newVote = {
         id: Date.now(),
         name,
@@ -961,69 +1246,44 @@ function doPost(e) {
         createdAt: new Date().toLocaleDateString('es-AR')
       };
 
-      const votes = getVotes();
-      votes.unshift(newVote);
-      saveVotes(votes);
+      // Guardar inmediatamente en local y sincronizar con el resto de dispositivos
+      const initialMerged = mergeVoteLists([newVote], getLocalVotes(), getClearTs());
+      saveLocalVotes(initialMerged);
       renderScoreboard();
       launchConfetti();
 
-      // Send to Google Apps Script if configured
-      const cfg = getConfig();
-      if (cfg.api) {
-        try {
-          fetch(cfg.api, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(newVote)
-          });
-        } catch (err) {
-          console.warn('No se pudo sincronizar con la nube:', err);
-        }
-      }
+      await syncFromCloud(false);
+      const finalMerged = mergeVoteLists([newVote], getLocalVotes(), getClearTs());
+      saveLocalVotes(finalMerged);
+      renderScoreboard();
+      await publishCloudState(finalMerged, getClearTs());
 
-      // Prepare WhatsApp share link
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✨ ¡Registrar mi Voto! ✨';
+      setSyncIndicator(false, 'Sincronizado en vivo 🔄');
+
+      const cfg = getConfig();
       const choiceText = formatChoiceLabel(selectedChoice);
+      const pageUrl = window.location.href.split('?')[0];
       const waText = `¡Hola! Acabo de votar en la apuesta del bebé 👶✨\n\n` +
         `🗳️ *Mi voto:* ${choiceText}\n` +
         `👤 *Soy:* ${name} (${rel})` +
-        (msg ? `\n💬 *Mensaje:* "${msg}"` : '');
+        (msg ? `\n💬 *Mensaje:* "${msg}"` : '') +
+        `\n\n👉 Mirá cómo va el marcador y votá acá: ${pageUrl}`;
 
       const cleanPhone = (cfg.whatsapp || '').replace(/[^0-9]/g, '');
       const waUrl = cleanPhone
         ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`
         : `https://wa.me/?text=${encodeURIComponent(waText)}`;
 
-      const waLink = document.getElementById('whatsapp-share-link');
-      waLink.href = waUrl;
-
+      document.getElementById('whatsapp-share-link').href = waUrl;
       document.getElementById('vote-success').style.display = 'block';
       document.getElementById('voter-name').value = '';
       document.getElementById('voter-msg').value = '';
     }
 
-    async function fetchCloudVotes(apiUrl) {
-      try {
-        const res = await fetch(apiUrl);
-        const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0) {
-          const cloudVotes = rows.map((r, idx) => ({
-            id: idx,
-            name: r[1] || 'Familiar',
-            rel: r[2] || 'Familia',
-            choice: r[3] || 'ni_idea',
-            msg: r[4] || ''
-          })).reverse();
-          saveVotes(cloudVotes);
-          renderScoreboard();
-        }
-      } catch (err) {
-        console.warn('Modo local activo.');
-      }
-    }
-
     function renderScoreboard() {
-      const votes = getVotes();
+      const votes = getLocalVotes();
       const total = votes.length;
       const countVaron = votes.filter(v => v.choice === 'varon').length;
       const countNena = votes.filter(v => v.choice === 'nena').length;
@@ -1050,7 +1310,7 @@ function doPost(e) {
         document.getElementById('bar-varon').style.width = `${(countVaron / total) * 100}%`;
         document.getElementById('bar-nena').style.width = `${(countNena / total) * 100}%`;
         document.getElementById('bar-idk').style.width = `${(countIdk / total) * 100}%`;
-        document.getElementById('total-votes-text').textContent = `Total de votos registrados: ${total}`;
+        document.getElementById('total-votes-text').textContent = `Total de votos familiares registrados: ${total}`;
       }
 
       const wall = document.getElementById('wall-container');
@@ -1061,14 +1321,14 @@ function doPost(e) {
 
       wall.innerHTML = votes.map(v => `
         <div class="wall-item">
-          <div class="wall-avatar ${v.choice}">${formatChoiceEmoji(v.choice)}</div>
+          <div class="wall-avatar ${escapeHtml(v.choice)}">${formatChoiceEmoji(v.choice)}</div>
           <div class="wall-content">
             <div class="wall-header">
               <div>
                 <span class="wall-name">${escapeHtml(v.name)}</span>
                 <span class="wall-rel">• ${escapeHtml(v.rel)}</span>
               </div>
-              <span class="wall-badge ${v.choice}">${formatChoiceLabel(v.choice)}</span>
+              <span class="wall-badge ${escapeHtml(v.choice)}">${formatChoiceLabel(v.choice)}</span>
             </div>
             ${v.msg ? `<div class="wall-msg">"${escapeHtml(v.msg)}"</div>` : ''}
           </div>
@@ -1084,21 +1344,18 @@ function doPost(e) {
         .replace(/"/g, '&quot;');
     }
 
-    function loadDemoVotes() {
-      const sample = [
-        { id: 1, name: 'Abuela Carmen', rel: 'Abuelo/a', choice: 'nena', msg: '¡Soñé que venía una nena hermosa! Que llegue con toda la salud del mundo.' },
-        { id: 2, name: 'Tío Lucas', rel: 'Tío/a', choice: 'varon', msg: '¡Se viene el delantero de la familia! Apuesto todo a varón.' },
-        { id: 3, name: 'Prima Vale', rel: 'Primo/a', choice: 'ni_idea', msg: '¡No tengo ni idea, estoy súper intrigada! Los queremos muchísimo.' },
-        { id: 4, name: 'Abuelo Jorge', rel: 'Abuelo/a', choice: 'varon', msg: 'Por la forma de la panza, para mí es varón sin dudas.' }
-      ];
-      saveVotes(sample);
-      renderScoreboard();
-    }
-
-    function clearLocalVotes() {
+    async function clearAllVotes() {
+      if (!confirm('¿Querés borrar todos los votos y dejar el marcador en 0 en TODOS los dispositivos?')) {
+        return;
+      }
+      const now = Date.now();
+      setClearTs(now);
       localStorage.removeItem(STORAGE_KEY);
       document.getElementById('vote-success').style.display = 'none';
       renderScoreboard();
+      setSyncIndicator(true, 'Reiniciando en todos los equipos...');
+      await publishCloudState([], now);
+      setSyncIndicator(false, 'Marcador reiniciado 🔄');
     }
 
     function openConfigModal() {
@@ -1106,7 +1363,6 @@ function doPost(e) {
       document.getElementById('cfg-parents').value = cfg.parents === '👶 Bebé en camino' ? '' : cfg.parents;
       document.getElementById('cfg-date').value = cfg.date === '📅 ¡Cada día falta menos!' ? '' : cfg.date;
       document.getElementById('cfg-whatsapp').value = cfg.whatsapp;
-      document.getElementById('cfg-api').value = cfg.api;
       document.getElementById('config-modal').classList.add('open');
     }
 
@@ -1114,27 +1370,21 @@ function doPost(e) {
       document.getElementById('config-modal').classList.remove('open');
     }
 
-    function saveConfig() {
+    async function saveConfig() {
       const parents = document.getElementById('cfg-parents').value.trim() || '👶 Bebé en camino';
       const date = document.getElementById('cfg-date').value.trim() || '📅 ¡Cada día falta menos!';
       const whatsapp = document.getElementById('cfg-whatsapp').value.trim();
-      const api = document.getElementById('cfg-api').value.trim();
 
-      const cfg = { parents, date, whatsapp, api };
+      const cfg = { parents, date, whatsapp };
       localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-
-      const url = new URL(window.location.href);
-      url.searchParams.set('papas', parents);
-      url.searchParams.set('fecha', date);
-      if (whatsapp) url.searchParams.set('wa', whatsapp); else url.searchParams.delete('wa');
-      if (api) url.searchParams.set('api', api); else url.searchParams.delete('api');
-
-      window.history.replaceState({}, '', url.toString());
       applyConfig();
       closeConfigModal();
+
+      setSyncIndicator(true, 'Guardando cambios...');
+      await publishCloudState(getLocalVotes(), getClearTs(), cfg);
+      setSyncIndicator(false, 'Sincronizado en vivo 🔄');
     }
 
-    // Simple celebratory confetti
     function launchConfetti() {
       const canvas = document.getElementById('confetti-canvas');
       const ctx = canvas.getContext('2d');
@@ -1178,9 +1428,12 @@ function doPost(e) {
       draw();
     }
 
-    // Initialize
+    // Inicializar página y sincronización automática
     applyConfig();
     renderScoreboard();
+    syncFromCloud(true);
+    startRealtimeStream();
+    setInterval(() => syncFromCloud(false), 10000);
   </script>
 </body>
 </html>
