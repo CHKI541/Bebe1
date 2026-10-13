@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¿Varón, Nena o Ni Idea? — La Gran Apuesta Familiar</title>
+  <meta name="description" content="¡Votá y dejá tu predicción para el bebé en camino! ¿Será varón, nena o sorpresa total?" />
+  <style>
+    :root {
+      --bg-cream: #FFFDF9;
+      --surface: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-soft: #E2E8F0;
+
+      /* Team Varón */
+      --boy-primary: #0284C7;
+      --boy-light: #E0F2FE;
+      --boy-border: #7DD3FC;
+      --boy-dark: #0369A1;
+
+      /* Team Nena */
+      --girl-primary: #DB2777;
+      --girl-light: #FCE7F3;
+      --girl-border: #F9A8D4;
+      --girl-dark: #BE185D;
+
+      /* Team Ni Idea */
+      --idk-primary: #D97706;
+      --idk-light: #FEF3C7;
+      --idk-border: #FCD34D;
+      --idk-dark: #B45309;
+
+      --accent-purple: #6366F1;
+      --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.12);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-cream);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(224, 242, 254, 0.75) 0%, transparent 38%),
+        radial-gradient(circle at 88% 15%, rgba(252, 231, 243, 0.75) 0%, transparent 38%),
+        radial-gradient(circle at 50% 85%, rgba(254, 243, 199, 0.6) 0%, transparent 45%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 60px;
+      overflow-x: hidden;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    /* Hero Header */
+    .hero {
+      text-align: center;
+      padding: 36px 24px 32px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--boy-primary) 0%, var(--idk-primary) 50%, var(--girl-primary) 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, #E0F2FE, #FEF3C7, #FCE7F3);
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      font-family: Georgia, 'Playfair Display', serif;
+      font-size: clamp(1.85rem, 4.5vw, 2.65rem);
+      color: #0F172A;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero p.subtitle {
+      font-size: 1.06rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto 14px;
+    }
+
+    .hero-meta {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: #475569;
+    }
+
+    .hero-meta span {
+      background: #F8FAFC;
+      border: 1px solid var(--border-soft);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Card Wrapper */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid #F1F5F9;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0F172A;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-desc {
+      font-size: 0.94rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* 3 Voting Cards Grid */
+    .vote-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .vote-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .vote-card {
+      border: 2.5px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #FFFFFF;
+      position: relative;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vote-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .vote-card .icon-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+      transition: transform 0.22s ease;
+    }
+
+    .vote-card:hover .icon-circle {
+      transform: scale(1.08);
+    }
+
+    .vote-card h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .vote-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .vote-card .check-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: transparent;
+      transition: all 0.2s ease;
+    }
+
+    /* Boy Theme */
+    .vote-card[data-choice="varon"] .icon-circle {
+      background: var(--boy-light);
+      color: var(--boy-primary);
+    }
+    .vote-card[data-choice="varon"]:hover,
+    .vote-card[data-choice="varon"].selected {
+      border-color: var(--boy-primary);
+      background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
+    }
+    .vote-card[data-choice="varon"].selected {
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+    }
+    .vote-card[data-choice="varon"].selected .check-badge {
+      background: var(--boy-primary);
+      border-color: var(--boy-primary);
+      color: #FFF;
+    }
+
+    /* Girl Theme */
+    .vote-card[data-choice="nena"] .icon-circle {
+      background: var(--girl-light);
+      color: var(--girl-primary);
+    }
+    .vote-card[data-choice="nena"]:hover,
+    .vote-card[data-choice="nena"].selected {
+      border-color: var(--girl-primary);
+      background: linear-gradient(180deg, #FFFFFF 0%, #FDF2F8 100%);
+    }
+    .vote-card[data-choice="nena"].selected {
+      box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.15);
+    }
+    .vote-card[data-choice="nena"].selected .check-badge {
+      background: var(--girl-primary);
+      border-color: var(--girl-primary);
+      color: #FFF;
+    }
+
+    /* Ni Idea Theme */
+    .vote-card[data-choice="ni_idea"] .icon-circle {
+      background: var(--idk-light);
+      color: var(--idk-primary);
+    }
+    .vote-card[data-choice="ni_idea"]:hover,
+    .vote-card[data-choice="ni_idea"].selected {
+      border-color: var(--idk-primary);
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFFBEB 100%);
+    }
+    .vote-card[data-choice="ni_idea"].selected {
+      box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+    }
+    .vote-card[data-choice="ni_idea"].selected .check-badge {
+      background: var(--idk-primary);
+      border-color: var(--idk-primary);
+      color: #FFF;
+    }
+
+    /* Form Fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: var(--radius-sm);
+      font-size: 0.96rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background: #F8FAFC;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+      outline: none;
+      border-color: #6366F1;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 15px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #0284C7 0%, #6366F1 50%, #DB2777 100%);
+      color: #FFFFFF;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.28);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.36);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .error-msg {
+      display: none;
+      background: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    /* Success Banner after voting */
+    .vote-success {
+      display: none;
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+      border: 1.5px solid #86EFAC;
+      text-align: center;
+    }
+
+    .vote-success h4 {
+      color: #166534;
+      font-size: 1.12rem;
+      margin-bottom: 6px;
+    }
+
+    .vote-success p {
+      color: #15803D;
+      font-size: 0.92rem;
+      margin-bottom: 14px;
+    }
+
+    .whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #25D366;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 11px 20px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+      transition: transform 0.15s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .whatsapp-btn:hover {
+      transform: translateY(-2px);
+      background: #20BD5A;
+    }
+
+    /* Live Scoreboard */
+    .scoreboard-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .score-pill {
+      padding: 14px 12px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid transparent;
+    }
+
+    .score-pill.boy {
+      background: var(--boy-light);
+      border-color: var(--boy-border);
+      color: var(--boy-dark);
+    }
+
+    .score-pill.girl {
+      background: var(--girl-light);
+      border-color: var(--girl-border);
+      color: var(--girl-dark);
+    }
+
+    .score-pill.idk {
+      background: var(--idk-light);
+      border-color: var(--idk-border);
+      color: var(--idk-dark);
+    }
+
+    .score-pill .count {
+      font-size: 1.65rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .score-pill .label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .score-pill .pct {
+      font-size: 0.78rem;
+      opacity: 0.85;
+      font-weight: 600;
+    }
+
+    /* Stacked Progress Bar */
+    .stacked-bar-container {
+      height: 18px;
+      background: #F1F5F9;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 10px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .bar-segment {
+      height: 100%;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bar-boy { background: var(--boy-primary); }
+    .bar-girl { background: var(--girl-primary); }
+    .bar-idk { background: var(--idk-primary); }
+
+    .total-votes-caption {
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Predictions Wall */
+    .wall-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .wall-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: #F8FAFC;
+      border: 1px solid var(--border-soft);
+    }
+
+    .wall-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      font-weight: 800;
+    }
+
+    .wall-avatar.varon { background: var(--boy-light); color: var(--boy-primary); }
+    .wall-avatar.nena { background: var(--girl-light); color: var(--girl-primary); }
+    .wall-avatar.ni_idea { background: var(--idk-light); color: var(--idk-primary); }
+
+    .wall-content {
+      flex: 1;
+    }
+
+    .wall-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .wall-name {
+      font-weight: 800;
+      color: #0F172A;
+      font-size: 0.96rem;
+    }
+
+    .wall-rel {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .wall-badge {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .wall-badge.varon { background: var(--boy-light); color: var(--boy-dark); }
+    .wall-badge.nena { background: var(--girl-light); color: var(--girl-dark); }
+    .wall-badge.ni_idea { background: var(--idk-light); color: var(--idk-dark); }
+
+    .wall-msg {
+      font-size: 0.9rem;
+      color: #334155;
+      margin-top: 2px;
+    }
+
+    .empty-wall {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 0.94rem;
+      background: #F8FAFC;
+      border-radius: var(--radius-md);
+      border: 1px dashed #CBD5E1;
+    }
+
+    /* Footer & Host Config */
+    .footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .ghost-btn {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #CBD5E1;
+      color: #475569;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.83rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .ghost-btn:hover {
+      background: #FFFFFF;
+      color: #0F172A;
+      border-color: #94A3B8;
+    }
+
+    /* Modal for Host Customization */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-box h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+
+    .modal-box p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .code-snippet {
+      background: #0F172A;
+      color: #E2E8F0;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      overflow-x: auto;
+      margin: 8px 0 14px;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="container">
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-badge">✨ ¡Dulce Espera en la Familia! ✨</div>
+      <h1 id="hero-title">¿Será Varón, Nena o Sorpresa?</h1>
+      <p class="subtitle" id="hero-subtitle">
+        Estamos felices esperando al nuevo integrante de la familia y queremos que hagas tu apuesta oficial antes de que nazca. ¡Elegí tu equipo y dejanos tu deseo!
+      </p>
+      <div class="hero-meta">
+        <span id="meta-parents">👶 Bebé en camino</span>
+        <span id="meta-date">📅 ¡Cada día falta menos!</span>
+      </div>
+    </header>
+
+    <!-- VOTING CARD -->
+    <section class="card" aria-labelledby="vote-heading">
+      <h2 class="section-title" id="vote-heading">🗳️ 1. Elegí tu predicción</h2>
+      <p class="section-desc">Tocá una de las 3 opciones para votar qué creés que va a ser:</p>
+
+      <div class="vote-options" role="radiogroup" aria-label="Opciones de votación">
+        <!-- VARON -->
+        <div class="vote-card" data-choice="varon" onclick="selectChoice('varon')" role="radio" aria-checked="false" tabindex="0">
+          <div class="check-badge">✓</div>
+          <div class="icon-circle">🩵</div>
+          <h3>¡Es Varón!</h3>
+          <p>Team Celeste</p>
+        </div>
+
+        <!-- NENA -->
+        <div class="vote-card" data-choice="nena" onclick="selectChoice('nena')" role="radio" aria-checked="false" tabindex="0">
+          <div class="check-badge">✓</div>
+          <div class="icon-circle">🩷</div>
+          <h3>¡Es Nena!</h3>
+          <p>Team Rosa</p>
+        </div>
+
+        <!-- NI IDEA -->
+        <div class="vote-card" data-choice="ni_idea" onclick="selectChoice('ni_idea')" role="radio" aria-checked="false" tabindex="0">
+          <div class="check-badge">✓</div>
+          <div class="icon-circle">💛</div>
+          <h3>¡Ni idea!</h3>
+          <p>Team Sorpresa Total</p>
+        </div>
+      </div>
+
+      <h2 class="section-title">💌 2. Contanos quién vota</h2>
+      <p class="section-desc">Así queda registrado tu voto en el marcador familiar:</p>
+
+      <div id="error-box" class="error-msg"></div>
+
+      <form id="vote-form" onsubmit="submitVote(event)">
+        <div class="form-grid">
+          <div class="field-group">
+            <label for="voter-name">Tu nombre *</label>
+            <input type="text" id="voter-name" placeholder="Ej: Tía Marta, Abuelo Jorge..." required />
+          </div>
+          <div class="field-group">
+            <label for="voter-rel">¿Qué sos del bebé?</label>
+            <select id="voter-rel">
+              <option value="Familia">Familia</option>
+              <option value="Abuelo/a">Abuelo / Abuela</option>
+              <option value="Tío/a">Tío / Tía</option>
+              <option value="Primo/a">Primo / Prima</option>
+              <option value="Padrino / Madrina">Padrino / Madrina</option>
+              <option value="Amigo/a de la familia">Amigo/a de la familia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 14px;">
+          <label for="voter-msg">Mensajito o predicción extra (opcional)</label>
+          <textarea id="voter-msg" rows="2" placeholder="Ej: ¡Para mí es nena y sale igualita a la mamá! Que venga con mucha salud ❤️"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          ✨ ¡Registrar mi Voto! ✨
+        </button>
+      </form>
+
+      <!-- SUCCESS & WHATSAPP SHARE -->
+      <div id="vote-success" class="vote-success">
+        <h4 id="success-title">🎉 ¡Tu voto quedó registrado!</h4>
+        <p id="success-desc">Mandá tu voto por WhatsApp al grupo de la familia o a los papás para que todos se enteren:</p>
+        <a id="whatsapp-share-link" href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
+          📲 Enviar mi voto por WhatsApp
+        </a>
+      </div>
+    </section>
+
+    <!-- LIVE SCOREBOARD -->
+    <section class="card" aria-labelledby="results-heading">
+      <h2 class="section-title" id="results-heading">📊 Marcador Familiar</h2>
+      <p class="section-desc">Así viene la votación entre Varón, Nena y Ni idea:</p>
+
+      <div class="scoreboard-summary">
+        <div class="score-pill boy">
+          <div class="count" id="count-varon">0</div>
+          <div class="label">🩵 Varón</div>
+          <div class="pct" id="pct-varon">0%</div>
+        </div>
+        <div class="score-pill girl">
+          <div class="count" id="count-nena">0</div>
+          <div class="label">🩷 Nena</div>
+          <div class="pct" id="pct-nena">0%</div>
+        </div>
+        <div class="score-pill idk">
+          <div class="count" id="count-idk">0</div>
+          <div class="label">💛 Ni idea</div>
+          <div class="pct" id="pct-idk">0%</div>
+        </div>
+      </div>
+
+      <div class="stacked-bar-container" aria-label="Barra de progreso de votos">
+        <div class="bar-segment bar-boy" id="bar-varon" style="width: 33.3%;"></div>
+        <div class="bar-segment bar-girl" id="bar-nena" style="width: 33.3%;"></div>
+        <div class="bar-segment bar-idk" id="bar-idk" style="width: 33.4%;"></div>
+      </div>
+      <div class="total-votes-caption" id="total-votes-text">Todavía no hay votos — ¡sé la primera persona en votar!</div>
+
+      <!-- FAMILY WALL -->
+      <h3 class="section-title" style="margin-top: 26px; font-size: 1.1rem;">💬 Muro de Votos y Deseos</h3>
+      <div id="wall-container" class="wall-list"></div>
+    </section>
+
+    <!-- FOOTER TOOLS FOR HOST -->
+    <div class="footer-actions">
+      <button type="button" class="ghost-btn" onclick="loadDemoVotes()">👀 Ver ejemplo con votos de prueba</button>
+      <button type="button" class="ghost-btn" onclick="openConfigModal()">⚙️ Personalizar nombres / Conectar planilla</button>
+      <button type="button" class="ghost-btn" onclick="clearLocalVotes()">🗑️ Reiniciar marcador local</button>
+    </div>
+  </div>
+
+  <!-- MODAL FOR PARENTS / HOST CUSTOMIZATION -->
+  <div class="modal-backdrop" id="config-modal">
+    <div class="modal-box">
+      <h3>⚙️ Personalizar Página para tu Familia</h3>
+      <p>Podés personalizar los nombres, la fecha y el WhatsApp sin tocar código. Al guardar se genera un link listo para mandar a tu familia:</p>
+
+      <div class="field-group" style="margin-bottom: 12px;">
+        <label for="cfg-parents">Nombres de los papás o familia</label>
+        <input type="text" id="cfg-parents" placeholder="Ej: Bebé de Sofi y Martín" />
+      </div>
+
+      <div class="field-group" style="margin-bottom: 12px;">
+        <label for="cfg-date">Fecha estimada o mensaje</label>
+        <input type="text" id="cfg-date" placeholder="Ej: Llegada: Abril 2027" />
+      </div>
+
+      <div class="field-group" style="margin-bottom: 12px;">
+        <label for="cfg-whatsapp">Número de WhatsApp para recibir votos (opcional, con código de país)</label>
+        <input type="text" id="cfg-whatsapp" placeholder="Ej: 5491122334455 (dejar vacío para elegir contacto al enviar)" />
+      </div>
+
+      <div class="field-group" style="margin-bottom: 14px;">
+        <label for="cfg-api">URL de Google Apps Script (opcional, para guardar todos los votos en un Google Sheet compartido)</label>
+        <input type="url" id="cfg-api" placeholder="https://script.google.com/macros/s/.../exec" />
+      </div>
+
+      <details style="margin-bottom: 16px; font-size: 0.84rem; color: #475569;">
+        <summary style="cursor: pointer; font-weight: 700; color: #0284C7;">¿Cómo conectar una hoja de Google Sheets gratis en 2 minutos?</summary>
+        <div style="margin-top: 8px;">
+          1. Creá una hoja en <b>Google Sheets</b> y andá a <b>Extensiones → Apps Script</b>.<br/>
+          2. Pegá este código corto y tocá <b>Implementar → Nueva implementación → Aplicación web</b> (Acceso: <i>Cualquier persona</i>):
+          <div class="code-snippet">function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rows = sheet.getDataRange().getValues();
+  return ContentService.createTextOutput(JSON.stringify(rows.slice(1)))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var d = JSON.parse(e.postData.contents);
+  sheet.appendRow([new Date(), d.name, d.rel, d.choice, d.msg]);
+  return ContentService.createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+          3. Copiá la URL que te da Google y pegala arriba. ¡Todos los votos de cualquier celular se verán en vivo!
+        </div>
+      </details>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" class="ghost-btn" onclick="closeConfigModal()">Cerrar</button>
+        <button type="button" class="submit-btn" style="margin-top: 0; width: auto; padding: 10px 20px;" onclick="saveConfig()">Guardar y actualizar link</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'baby_poll_votes_v1';
+    const CONFIG_KEY = 'baby_poll_config_v1';
+    let selectedChoice = null;
+
+    // Load config from URL params or localStorage
+    function getConfig() {
+      const params = new URLSearchParams(window.location.search);
+      const saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}');
+      return {
+        parents: params.get('papas') || saved.parents || '👶 Bebé en camino',
+        date: params.get('fecha') || saved.date || '📅 ¡Cada día falta menos!',
+        whatsapp: params.get('wa') || saved.whatsapp || '',
+        api: params.get('api') || saved.api || ''
+      };
+    }
+
+    function applyConfig() {
+      const cfg = getConfig();
+      document.getElementById('meta-parents').textContent = cfg.parents;
+      document.getElementById('meta-date').textContent = cfg.date;
+      if (cfg.api) {
+        fetchCloudVotes(cfg.api);
+      }
+    }
+
+    function selectChoice(choice) {
+      selectedChoice = choice;
+      document.querySelectorAll('.vote-card').forEach(card => {
+        const isSelected = card.getAttribute('data-choice') === choice;
+        card.classList.toggle('selected', isSelected);
+        card.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      });
+      document.getElementById('error-box').style.display = 'none';
+    }
+
+    function getVotes() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveVotes(votes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
+    }
+
+    function formatChoiceLabel(choice) {
+      if (choice === 'varon') return '🩵 ¡Es Varón!';
+      if (choice === 'nena') return '🩷 ¡Es Nena!';
+      return '💛 ¡Ni idea!';
+    }
+
+    function formatChoiceEmoji(choice) {
+      if (choice === 'varon') return '🩵';
+      if (choice === 'nena') return '🩷';
+      return '💛';
+    }
+
+    async function submitVote(e) {
+      e.preventDefault();
+      const errorBox = document.getElementById('error-box');
+      if (!selectedChoice) {
+        errorBox.textContent = 'Por favor, elegí primero una de las 3 tarjetas: ¿Varón, Nena o Ni idea?';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      const name = document.getElementById('voter-name').value.trim();
+      const rel = document.getElementById('voter-rel').value;
+      const msg = document.getElementById('voter-msg').value.trim();
+
+      if (!name) {
+        errorBox.textContent = 'Por favor, escribí tu nombre para registrar el voto.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      const newVote = {
+        id: Date.now(),
+        name,
+        rel,
+        choice: selectedChoice,
+        msg,
+        createdAt: new Date().toLocaleDateString('es-AR')
+      };
+
+      const votes = getVotes();
+      votes.unshift(newVote);
+      saveVotes(votes);
+      renderScoreboard();
+      launchConfetti();
+
+      // Send to Google Apps Script if configured
+      const cfg = getConfig();
+      if (cfg.api) {
+        try {
+          fetch(cfg.api, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(newVote)
+          });
+        } catch (err) {
+          console.warn('No se pudo sincronizar con la nube:', err);
+        }
+      }
+
+      // Prepare WhatsApp share link
+      const choiceText = formatChoiceLabel(selectedChoice);
+      const waText = `¡Hola! Acabo de votar en la apuesta del bebé 👶✨\n\n` +
+        `🗳️ *Mi voto:* ${choiceText}\n` +
+        `👤 *Soy:* ${name} (${rel})` +
+        (msg ? `\n💬 *Mensaje:* "${msg}"` : '');
+
+      const cleanPhone = (cfg.whatsapp || '').replace(/[^0-9]/g, '');
+      const waUrl = cleanPhone
+        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`
+        : `https://wa.me/?text=${encodeURIComponent(waText)}`;
+
+      const waLink = document.getElementById('whatsapp-share-link');
+      waLink.href = waUrl;
+
+      document.getElementById('vote-success').style.display = 'block';
+      document.getElementById('voter-name').value = '';
+      document.getElementById('voter-msg').value = '';
+    }
+
+    async function fetchCloudVotes(apiUrl) {
+      try {
+        const res = await fetch(apiUrl);
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const cloudVotes = rows.map((r, idx) => ({
+            id: idx,
+            name: r[1] || 'Familiar',
+            rel: r[2] || 'Familia',
+            choice: r[3] || 'ni_idea',
+            msg: r[4] || ''
+          })).reverse();
+          saveVotes(cloudVotes);
+          renderScoreboard();
+        }
+      } catch (err) {
+        console.warn('Modo local activo.');
+      }
+    }
+
+    function renderScoreboard() {
+      const votes = getVotes();
+      const total = votes.length;
+      const countVaron = votes.filter(v => v.choice === 'varon').length;
+      const countNena = votes.filter(v => v.choice === 'nena').length;
+      const countIdk = votes.filter(v => v.choice === 'ni_idea').length;
+
+      const pctVaron = total ? Math.round((countVaron / total) * 100) : 0;
+      const pctNena = total ? Math.round((countNena / total) * 100) : 0;
+      const pctIdk = total ? Math.max(0, 100 - pctVaron - pctNena) : 0;
+
+      document.getElementById('count-varon').textContent = countVaron;
+      document.getElementById('count-nena').textContent = countNena;
+      document.getElementById('count-idk').textContent = countIdk;
+
+      document.getElementById('pct-varon').textContent = `${pctVaron}%`;
+      document.getElementById('pct-nena').textContent = `${pctNena}%`;
+      document.getElementById('pct-idk').textContent = `${pctIdk}%`;
+
+      if (total === 0) {
+        document.getElementById('bar-varon').style.width = '33.3%';
+        document.getElementById('bar-nena').style.width = '33.3%';
+        document.getElementById('bar-idk').style.width = '33.4%';
+        document.getElementById('total-votes-text').textContent = 'Todavía no hay votos — ¡sé la primera persona en votar!';
+      } else {
+        document.getElementById('bar-varon').style.width = `${(countVaron / total) * 100}%`;
+        document.getElementById('bar-nena').style.width = `${(countNena / total) * 100}%`;
+        document.getElementById('bar-idk').style.width = `${(countIdk / total) * 100}%`;
+        document.getElementById('total-votes-text').textContent = `Total de votos registrados: ${total}`;
+      }
+
+      const wall = document.getElementById('wall-container');
+      if (total === 0) {
+        wall.innerHTML = `<div class="empty-wall">🌟 Todavía no hay predicciones cargadas. ¡Elegí una opción arriba para inaugurar el muro familiar!</div>`;
+        return;
+      }
+
+      wall.innerHTML = votes.map(v => `
+        <div class="wall-item">
+          <div class="wall-avatar ${v.choice}">${formatChoiceEmoji(v.choice)}</div>
+          <div class="wall-content">
+            <div class="wall-header">
+              <div>
+                <span class="wall-name">${escapeHtml(v.name)}</span>
+                <span class="wall-rel">• ${escapeHtml(v.rel)}</span>
+              </div>
+              <span class="wall-badge ${v.choice}">${formatChoiceLabel(v.choice)}</span>
+            </div>
+            ${v.msg ? `<div class="wall-msg">"${escapeHtml(v.msg)}"</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function loadDemoVotes() {
+      const sample = [
+        { id: 1, name: 'Abuela Carmen', rel: 'Abuelo/a', choice: 'nena', msg: '¡Soñé que venía una nena hermosa! Que llegue con toda la salud del mundo.' },
+        { id: 2, name: 'Tío Lucas', rel: 'Tío/a', choice: 'varon', msg: '¡Se viene el delantero de la familia! Apuesto todo a varón.' },
+        { id: 3, name: 'Prima Vale', rel: 'Primo/a', choice: 'ni_idea', msg: '¡No tengo ni idea, estoy súper intrigada! Los queremos muchísimo.' },
+        { id: 4, name: 'Abuelo Jorge', rel: 'Abuelo/a', choice: 'varon', msg: 'Por la forma de la panza, para mí es varón sin dudas.' }
+      ];
+      saveVotes(sample);
+      renderScoreboard();
+    }
+
+    function clearLocalVotes() {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('vote-success').style.display = 'none';
+      renderScoreboard();
+    }
+
+    function openConfigModal() {
+      const cfg = getConfig();
+      document.getElementById('cfg-parents').value = cfg.parents === '👶 Bebé en camino' ? '' : cfg.parents;
+      document.getElementById('cfg-date').value = cfg.date === '📅 ¡Cada día falta menos!' ? '' : cfg.date;
+      document.getElementById('cfg-whatsapp').value = cfg.whatsapp;
+      document.getElementById('cfg-api').value = cfg.api;
+      document.getElementById('config-modal').classList.add('open');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('config-modal').classList.remove('open');
+    }
+
+    function saveConfig() {
+      const parents = document.getElementById('cfg-parents').value.trim() || '👶 Bebé en camino';
+      const date = document.getElementById('cfg-date').value.trim() || '📅 ¡Cada día falta menos!';
+      const whatsapp = document.getElementById('cfg-whatsapp').value.trim();
+      const api = document.getElementById('cfg-api').value.trim();
+
+      const cfg = { parents, date, whatsapp, api };
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('papas', parents);
+      url.searchParams.set('fecha', date);
+      if (whatsapp) url.searchParams.set('wa', whatsapp); else url.searchParams.delete('wa');
+      if (api) url.searchParams.set('api', api); else url.searchParams.delete('api');
+
+      window.history.replaceState({}, '', url.toString());
+      applyConfig();
+      closeConfigModal();
+    }
+
+    // Simple celebratory confetti
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#0284C7', '#38BDF8', '#DB2777', '#F472B6', '#F59E0B', '#FCD34D'];
+      const pieces = Array.from({ length: 85 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: 8 + Math.random() * 6,
+        h: 10 + Math.random() * 8,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vy: 3 + Math.random() * 4,
+        vx: -2 + Math.random() * 4,
+        angle: Math.random() * 360,
+        vAngle: -4 + Math.random() * 8
+      }));
+
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.angle += p.vAngle;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.angle * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frame++;
+        if (frame < 140) {
+          requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      draw();
+    }
+
+    // Initialize
+    applyConfig();
+    renderScoreboard();
+  </script>
+</body>
+</html>
